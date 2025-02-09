@@ -1,5 +1,5 @@
 exploratory/*.ipynb
-products/*.ipynb
+*.ipynb
 scripts/*.ipynb
 tasks/*.ipynb
 *.metadata
