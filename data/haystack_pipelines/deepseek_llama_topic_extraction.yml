@@ -1,0 +1,103 @@
+components:
+  AnswerParser:
+    init_parameters:
+      pattern: <classe="(.*)"
+      reference_pattern: null
+    type: haystack.components.builders.answer_builder.AnswerBuilder
+  Builder:
+    init_parameters:
+      required_variables:
+      - campione
+      - categories
+      template:
+      - _content:
+        - text: "Sei un assistente specializzato nell'analisi e classificazione di\
+            \ testi in italiano. Il tuo compito \xE8 duplice:\n\n1. Comprendere il\
+            \ livello qualitativo del contenuto informativo del testo, basandoti sulla\
+            \ seguente scala:\n   - Problematic Content: contenuti inappropriati (pornografia,\
+            \ gambling, testo mal formattato)\n   - None: assenza di contenuto informativo\
+            \ (es. pubblicit\xE0, post social)\n   - Minimal: contenuto con minima\
+            \ valenza informativa non intenzionale\n   - Basic: contenuto con discreto\
+            \ valore informativo\n   - Good: contenuto ben strutturato con chiaro\
+            \ intento educativo\n   - Basic: contenuto con elevato valore informativo\
+            \ e ottima strutturazione\n\n2. Identificare una categoria tematica di\
+            \ alto livello che rappresenti l'argomento principale del testo.\n\nCONTESTO\
+            \ OPERATIVO:\n- Hai accesso a un elenco di parole chiave di basso livello\
+            \ estratte dal testo\n- Hai accesso a un elenco di categorie tematiche\
+            \ gi\xE0 utilizzate in precedenza\n- Puoi sia utilizzare categorie esistenti\
+            \ che crearne di nuove quando necessario\n\nREGOLE DI CATEGORIZZAZIONE:\n\
+            - Usa categorie ampie e generali (es. \"Medicina\", \"Sport\", \"Tecnologia\"\
+            )\n- Mantieni consistenza con le categorizzazioni precedenti\n- Crea nuove\
+            \ categorie solo quando strettamente necessario\n- Usa sempre singolare\
+            \ per le categorie (es. \"Calcio\" non \"Calcistica\")\n- Usa nomi semplici\
+            \ e diretti (es. \"Politica\" non \"Scienze Politiche\")\n\nOUTPUT:\n\
+            Devi sempre rispondere utilizzando esclusivamente questo formato XML:\n\
+            <classe=\"CATEGORIA\" />\n\nDove CATEGORIA \xE8 la categoria tematica\
+            \ identificata.\n\nESEMPI DI CATEGORIZZAZIONE:\n- Testi su malattie, cure,\
+            \ farmaci \u2192 \"Medicina\"\n- Testi su partite, campionati \u2192 \"\
+            Calcio\"\n- Testi su prodotti in vendita \u2192 \"Pubblicit\xE0\"\n- Testi\
+            \ su smartphone, computer \u2192 \"Tecnologia\"\n- Testi su ricette, cucina\
+            \ \u2192 \"Gastronomia\"\n- Testi pubblicitari in cui singole persone\
+            \ promuovono il proprio lavoro-> \"Autopromozione\"\n\n{% if examples%}\n\
+            ## Esempi\n{% for ex in examples%}\n### Esempio {{loop.index}}\nTesto:\
+            \ {{ex.content}}\n{% if ex.meta['quality']%}Qualit\xE0: {{ex.meta['quality']}}\n\
+            {%endif%}{% if ex.meta['keywords']%}Parole Chiave: {{ex.meta['keywords']}}\n\
+            {%endif%}Categoria: <classe=\"{{ex.meta['category']}}\" />\n\n---\n{%\
+            \ endfor %}\n{%endif%}\nCategorie Esistenti:\n{% for cat in categories%}\n\
+            - \"{{cat}}\"\n{% endfor %}\nNOTA IMPORTANTE:\nPrima di creare una nuova\
+            \ categoria, verifica sempre se \xE8 possibile utilizzare una categoria\
+            \ esistente nell'elenco fornito. La creazione di nuove categorie deve\
+            \ essere l'ultima risorsa quando nessuna categoria esistente \xE8 appropriata."
+        _meta: {}
+        _name: null
+        _role: system
+      - _content:
+        - text: "Campione:\n---\nTesto: {{campione.content}}\n{% if campione.meta['quality']%}Qualit\xE0\
+            : {{campione.meta['quality']}}\n{%endif%}{% if campione.meta['keywords']%}Parole\
+            \ Chiave: {{campione.meta['keywords']}}\n{%endif%}"
+        _meta: {}
+        _name: null
+        _role: user
+      variables:
+      - campione
+      - examples
+      - categories
+    type: haystack.components.builders.chat_prompt_builder.ChatPromptBuilder
+  DocToStr:
+    init_parameters:
+      custom_filters: {}
+      output_type: str
+      template: '{{doc.content}}'
+      unsafe: false
+    type: haystack.components.converters.output_adapter.OutputAdapter
+  Generator:
+    init_parameters:
+      generation_kwargs:
+        num_ctx: 12288
+        seed: 42
+        stop: null
+      keep_alive: null
+      model: deepseek-r1:8b-llama-distill-q8_0
+      response_format: null
+      streaming_callback: null
+      timeout: 120
+      tools: null
+      url: http://localhost:11434
+    type: haystack_integrations.components.generators.ollama.chat.chat_generator.OllamaChatGenerator
+  InputDoc:
+    init_parameters:
+      type_: haystack.dataclasses.document.Document
+    type: haystack.components.joiners.branch.BranchJoiner
+connections:
+- receiver: Builder.campione
+  sender: InputDoc.value
+- receiver: DocToStr.doc
+  sender: InputDoc.value
+- receiver: AnswerParser.query
+  sender: DocToStr.output
+- receiver: Generator.messages
+  sender: Builder.prompt
+- receiver: AnswerParser.replies
+  sender: Generator.replies
+max_runs_per_component: 100
+metadata: {}
