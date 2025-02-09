@@ -2,6 +2,9 @@ exploratory/*.ipynb
 products/*.ipynb
 scripts/*.ipynb
 tasks/*.ipynb
+*.metadata
+*.parquet
+notebooks/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
