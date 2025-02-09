@@ -225,4 +225,17 @@ class_sentences = samples["tfidf_text"].to_list()
 print_best_keywords(class_sentences[0:11])
 
 # %%
+df['tfidf_keywords'] = df["tfidf_text"].apply(
+        lambda x: [keyword for keyword, score in extract_top_k_keywords(vectorizer, x, k=n_keywords)]
+    )
+
+# %%
+df
+
+# %%
+df[df['educational_value_labels'].apply(lambda x: 'Excellent' in x)]["tfidf_text"].to_list()
+
+# %%
 df.to_parquet(product["dataset"])
+
+# %%
