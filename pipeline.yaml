@@ -1,17 +1,9 @@
 tasks:
-  - source: tasks.raw.get
-    product: products/raw/get.csv
-
-  - source: tasks.features.sepal
-    product: products/features/sepal.csv
-
-  - source: tasks.features.petal
-    product: products/features/petal.csv
-
-  - source: tasks.features.features
-    product: products/features/features.csv
-
-  - source: scripts/fit.py
+  - source: scripts/features/tf_idf_keywords.py
+    name: tf_idf_keywords
     product:
-      nb: products/report.ipynb
-      model: products/model.pickle
+      nb: products/features/tf_idf_keywords.ipynb
+      dataset: products/features/df_with_keywords.parquet 
+    params:
+      n_keywords: 5
+      source_dataset: 'hf://datasets/data-is-better-together/fineweb-c/ita_Latn/train-00000-of-00001.parquet'
