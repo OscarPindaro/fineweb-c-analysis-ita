@@ -12,6 +12,7 @@ from haystack.components.builders import ChatPromptBuilder
 from haystack.components.builders.answer_builder import AnswerBuilder
 from haystack.components.joiners import BranchJoiner
 from haystack.components.converters import OutputAdapter
+from tqdm import tqdm
 
 T = TypeVar('T', bound='PromptVariables')
 
@@ -47,6 +48,21 @@ class PromptVariables:
                               for doc in data['examples']]
         return cls(**data)
     
+    def save_to_file(self, filepath: str) -> None:
+        """Save PromptVariables to a JSON file"""
+        with open(filepath, 'w') as f:
+            json.dump(asdict(self), f, default=lambda o: o.__dict__)
+    
+    @classmethod
+    def load_from_file(cls, filepath: str) -> 'PromptVariables':
+        """Load PromptVariables from a JSON file"""
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+            if 'examples' in data:
+                data['examples'] = [Document(**doc) if isinstance(doc, dict) else doc 
+                                  for doc in data['examples']]
+            return cls(**data)
+    
 from typing import List
 from haystack import component
 from haystack import Pipeline
@@ -61,7 +77,7 @@ class TopicExtractionPipeline:
             self.pipeline_path = Path(self.pipeline_path)
             assert self.pipeline_path.exists()
             assert self.pipeline_path.is_file()
-        self.pipeline: Pipeline = Pipeline.load(self.pipeline_path)
+        self.pipeline: Pipeline = Pipeline.load(self.pipeline_path.open("r"))
         self.update_categories: bool = update_categories
         self.ret_filled_prompt: bool = ret_filled_prompt
     
@@ -70,7 +86,7 @@ class TopicExtractionPipeline:
         categories: List[str] = []
         answers: List[List[GeneratedAnswer]] = []
         builder_outs: List[List[ChatMessage]] = []
-        for input_sample in input_samples:
+        for input_sample in tqdm(input_samples):
             out = self.pipeline.run(data={
                 "InputDoc":{"value":input_sample},
                 "Builder":{

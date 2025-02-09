@@ -50,3 +50,26 @@ tasks:
       assistant_start: "<classe=\""
       stream_reaponse: False
 
+  - source: tasks.haystack_pipelines.run_topic_extraction
+    name: extract_topic_gemma
+    upstream: [tf_idf_keywords, create_gemma_pipeline]
+    product: products/models/gemma_topics.parquet
+    params:
+      prompt_vars_path: data/topic_promp_vars.json
+      pipeline_upstream: create_gemma_pipeline
+
+  - source: tasks.haystack_pipelines.run_topic_extraction
+    name: extract_topic_llama
+    upstream: [tf_idf_keywords, create_llama_pipeline]
+    product: products/models/llama_topics.parquet
+    params:
+      prompt_vars_path: data/topic_promp_vars.json
+      pipeline_upstream: create_llama_pipeline
+
+  - source: tasks.haystack_pipelines.run_topic_extraction
+    name: extract_topic_deepseek
+    upstream: [tf_idf_keywords, create_deepseek_pipeline]
+    product: products/models/deepseek_topics.parquet
+    params:
+      prompt_vars_path: data/topic_promp_vars.json
+      pipeline_upstream: create_deepseek_pipeline
