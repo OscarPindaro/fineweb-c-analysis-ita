@@ -1,9 +1,21 @@
+meta:
+    extract_upstream: False
+
 tasks:
+  # - source: tasks.raw.get
+  #   product: products/raw/get.csv
+
+  - source: tasks.download.download_parquet
+    name: download-dataset
+    product: products/get/dataset.parquet
+    params:
+      uri: 'hf://datasets/data-is-better-together/fineweb-c/ita_Latn/train-00000-of-00001.parquet'
+
   - source: scripts/features/tf_idf_keywords.py
     name: tf_idf_keywords
+    upstream: [download-dataset]
     product:
       nb: products/features/tf_idf_keywords.ipynb
       dataset: products/features/df_with_keywords.parquet 
     params:
       n_keywords: 5
-      source_dataset: 'hf://datasets/data-is-better-together/fineweb-c/ita_Latn/train-00000-of-00001.parquet'

@@ -35,13 +35,6 @@ upstream = None
 product = None
 
 
-# %% tags=["injected-parameters"]
-# Parameters
-n_keywords = 5
-source_dataset = "hf://datasets/data-is-better-together/fineweb-c/ita_Latn/train-00000-of-00001.parquet"
-product = {"nb": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/features/tf_idf_keywords.ipynb", "dataset": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/features/df_with_keywords.parquet"}
-
-
 # %% [markdown]
 # # Objective
 # The objective is to extract important keywords for each sentence.
@@ -56,8 +49,7 @@ product = {"nb": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/features/
 import pandas as pd
 
 # %%
-
-df = pd.read_parquet(source_dataset)
+df = pd.read_parquet(upstream["download-dataset"])
 
 # %% [markdown]
 # ## Text cleaning
@@ -146,12 +138,91 @@ def extract_top_k_keywords(vectorizer, sentence, k=10):
 # - innocous ads
 
 # %%
+def print_best_keywords(sentences):
+    for idx, p_sent in enumerate(sentences):
+        keyword_score_pairs = extract_top_k_keywords(vectorizer, p_sent, k=n_keywords)
+        print(f"Example {idx:02d}: {[keyword for keyword, score in keyword_score_pairs]}")
+
+
+# %%
 for idx, p_sent in enumerate(problematic_sentences):
     keyword_score_pairs = extract_top_k_keywords(vectorizer, p_sent, k=n_keywords)
     print(f"Example {idx:02d}: {[keyword for keyword, score in keyword_score_pairs]}")
 
 # %% [markdown]
-# Let's sample some random good quality samples and let's see roughly the distribution
+# Let's sample some random good quality samples and let's see roughly the distribution. I'm ignoring the one with problematic content.
 
 # %%
-df
+classes = ["None", "Minimal", "Basic", "Good", "Excellent"]
+value_mapping = {
+    "None":0,
+    "Minimal":1,
+    "Basic":2,
+    "Good":3,
+    "Excellent":4,
+    "❗ Problematic Content ❗":-1
+}
+
+
+# %%
+def best_educational_value(values):
+    """
+    Given a list of educational values, returns the value with the highest mapped score.
+    Uses value_mapping for comparison.
+    """
+    return max(values, key=lambda x: value_mapping.get(x, 0))
+
+
+
+# %%
+
+# %%
+df['best_educational_value'] = df['educational_value_labels'].apply(best_educational_value)
+safe_df = df[df["problematic_content_label_present"] == False]
+
+# %% [markdown]
+# ## Excellent
+# Looking at the outputs, il looks like that there are some samples about human biology and historical events.
+
+# %%
+excellent_samples = safe_df[safe_df["best_educational_value"]=="Excellent"]
+len(excellent_samples)
+
+# %%
+excellent_sents = df[df['educational_value_labels'].apply(lambda x: 'Excellent' in x)]["tfidf_text"].to_list()
+
+# %% [markdown]
+#
+
+# %%
+excellent_sents
+
+# %%
+print_best_keywords(excellent_sents)
+
+# %%
+filter_class = "Good"
+samples = safe_df[safe_df["best_educational_value"]==filter_class]
+print("Number of good samples", len(samples))
+class_sentences = samples["tfidf_text"].to_list()
+
+# %%
+class_sentences[0:10]
+
+# %%
+print_best_keywords(class_sentences[0:11])
+
+# %% [markdown]
+# ## Basic
+
+# %%
+filter_class = "Basic"
+samples = safe_df[safe_df["best_educational_value"]==filter_class]
+print("Number of good samples", len(samples))
+class_sentences = samples["tfidf_text"].to_list()
+
+# %%
+print_best_keywords(class_sentences[0:11])
+
+# %%
+df.to_parquet(product["dataset"])
