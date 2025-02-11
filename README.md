@@ -1,29 +1,15 @@
-# azz
-Requires [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
+# Fineweb Ita
 
-## Setup
+## 09/02/2025
+I extracted some keywrods with tf-idf. 
+I also created a classification pipeline with haystack. Next time i will have tocreate some few-shot examples, probably wrap evrything inside a haystack component that does this ..vvv
 
-```sh
-# NOTE: if running ploomber <0.16, remove the --create-env argument
-ploomber install --create-env
-# activate conda environment
-conda activate azz
+## 11/02
+Found a bug in the generation, now it works fine.
+Next time do the visualization.
+I was thinking to create an embedding like this:
+x: embedding of the text
+y: embedding of the category
+z: x+y -> so in the plot samples with similar category are closer
 
-```
-
-## Code editor integration
-
-* If using Jupyter, [click here](https://docs.ploomber.io/en/latest/user-guide/jupyter.html)
-* If using VSCode, PyCharm, or Spyder, [click here](https://docs.ploomber.io/en/latest/user-guide/editors.html)
-
-
-
-## Running the pipeline
-
-```sh
-ploomber build
-```
-
-## Help
-
-* Need help? [Ask us anything on Slack!](https://ploomber.io/community)
+Probably I'll export with plotly for the blog

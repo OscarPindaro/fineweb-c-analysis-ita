@@ -1,4 +1,5 @@
 from pathlib import Path
+import click
 from haystack import Document
 from dataclasses import dataclass, field, asdict
 from typing import List
@@ -82,10 +83,11 @@ class TopicExtractionPipeline:
         self.ret_filled_prompt: bool = ret_filled_prompt
     
     @component.output_types(categories=List[str], answers=List[List[GeneratedAnswer]], prompts=List[List[ChatMessage]] | None)
-    def run(self, input_samples: List[Document], prompt_vars: PromptVariables):
+    def run(self, input_samples: List[Document], prompt_vars: PromptVariables, verbose: bool = False):
         categories: List[str] = []
         answers: List[List[GeneratedAnswer]] = []
         builder_outs: List[List[ChatMessage]] = []
+        cont = 0
         for input_sample in tqdm(input_samples):
             out = self.pipeline.run(data={
                 "InputDoc":{"value":input_sample},
@@ -95,11 +97,24 @@ class TopicExtractionPipeline:
                 }, include_outputs_from={"Builder"}
             )
             category=out["AnswerParser"]["answers"][0].data
+
             if self.update_categories is True and category not in prompt_vars.categories:
-                prompt_vars.categories.append(prompt_vars)
+                prompt_vars.categories.append(category)
+            if verbose:
+                click.secho("Content: ", fg='green', nl=False)
+                click.secho(f"{input_sample.content}", fg='white')
+                click.secho("Category: ", fg='yellow', nl=False)
+                click.secho(f"{category}", fg='white')
+                click.secho("Builder Words: ", fg='blue', nl=False)
+                click.secho(f"{len(out["Builder"]["prompt"][0]._content[0].text.split()) + len(out["Builder"]["prompt"][1]._content[0].text.split())}", fg='white')
+                click.secho(f"Active Categories ({len(prompt_vars.categories)}): ", fg='red', nl=False)
+                click.secho(f"{prompt_vars.categories}", fg='white')
+                # print("System prompt",out["Builder"]["prompt"][0]._content[0].text)
+            # print(len(prompt_vars.categories))
             categories.append(category)
             answers.append(out["AnswerParser"]["answers"])
             builder_outs.append(out["Builder"]["prompt"])
+            cont += 1
             
         to_ret = {
             "categories":categories,

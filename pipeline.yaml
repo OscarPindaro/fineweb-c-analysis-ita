@@ -30,15 +30,15 @@ tasks:
       assistant_start: "<classe=\""
       stream_reaponse: False
   
-  - source: tasks.haystack_pipelines.create_topic_extraction_pipeline
-    name: create_deepseek_pipeline
-    product: data/haystack_pipelines/deepseek_llama_topic_extraction.yml
-    params:
-      model_id: "deepseek-r1:8b-llama-distill-q8_0"
-      system_prompt_path: data/system_prompt.md
-      ask_prompt_path: data/ask_prompt.md
-      assistant_start: "<classe=\""
-      stream_reaponse: False
+  # - source: tasks.haystack_pipelines.create_topic_extraction_pipeline
+  #   name: create_deepseek_pipeline
+  #   product: data/haystack_pipelines/deepseek_llama_topic_extraction.yml
+  #   params:
+  #     model_id: "deepseek-r1:8b-llama-distill-q8_0"
+  #     system_prompt_path: data/system_prompt.md
+  #     ask_prompt_path: data/ask_prompt.md
+  #     assistant_start: "<classe=\""
+  #     stream_reaponse: False
   
   - source: tasks.haystack_pipelines.create_topic_extraction_pipeline
     name: create_gemma_pipeline
@@ -57,6 +57,7 @@ tasks:
     params:
       prompt_vars_path: data/topic_promp_vars.json
       pipeline_upstream: create_gemma_pipeline
+      verbose: true
 
   - source: tasks.haystack_pipelines.run_topic_extraction
     name: extract_topic_llama
@@ -65,11 +66,20 @@ tasks:
     params:
       prompt_vars_path: data/topic_promp_vars.json
       pipeline_upstream: create_llama_pipeline
+      verbose: true
 
-  - source: tasks.haystack_pipelines.run_topic_extraction
-    name: extract_topic_deepseek
-    upstream: [tf_idf_keywords, create_deepseek_pipeline]
-    product: products/models/deepseek_topics.parquet
+  # - source: tasks.haystack_pipelines.run_topic_extraction
+  #   name: extract_topic_deepseek
+  #   upstream: [tf_idf_keywords, create_deepseek_pipeline]
+  #   product: products/models/deepseek_topics.parquet
+  #   params:
+  #     prompt_vars_path: data/topic_promp_vars.json
+  #     pipeline_upstream: create_deepseek_pipeline
+  #     verbose: true
+
+  - source: scripts/analyze/analyze_topics.py
+    upstream: [extract_topic_llama, extract_topic_gemma, tf_idf_keywords]
+    product: 
+      nb: products/analyze/analyze_llama_topics.ipynb
     params:
-      prompt_vars_path: data/topic_promp_vars.json
-      pipeline_upstream: create_deepseek_pipeline
+      embedder_model: ""
