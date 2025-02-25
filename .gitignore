@@ -5,6 +5,7 @@ tasks/*.ipynb
 *.metadata
 *.parquet
 notebooks/
+*html
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

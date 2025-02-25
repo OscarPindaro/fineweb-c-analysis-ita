@@ -12,6 +12,7 @@ dependencies = [
     "ollama-haystack>=2.3.0",
     "pandas>=2.2.3",
     "ploomber>=0.23.3",
+    "plotly>=6.0.0",
     "polars>=1.22.0",
     "scikit-learn>=1.6.1",
     "scipy>=1.15.1",

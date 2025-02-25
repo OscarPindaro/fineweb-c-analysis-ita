@@ -81,5 +81,6 @@ tasks:
     upstream: [extract_topic_llama, extract_topic_gemma, tf_idf_keywords]
     product: 
       nb: products/analyze/analyze_llama_topics.ipynb
+      plotly_diagrams: products/analyze/plotly_diagrams/
     params:
-      embedder_model: ""
+      embedder_model: "nickprock/sentence-bert-base-italian-uncased"
