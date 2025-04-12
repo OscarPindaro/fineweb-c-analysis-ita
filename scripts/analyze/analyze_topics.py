@@ -35,6 +35,13 @@ upstream = None
 product = None
 
 
+# %% tags=["injected-parameters"]
+# Parameters
+embedder_model = "nickprock/sentence-bert-base-italian-uncased"
+upstream = {"extract_topic_llama": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/models/llama_topics.parquet", "extract_topic_gemma": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/models/gemma_topics.parquet", "tf_idf_keywords": {"nb": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/features/tf_idf_keywords.ipynb", "dataset": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/features/df_with_keywords.parquet"}}
+product = {"nb": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/analyze/analyze_llama_topics.ipynb", "plotly_diagrams": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/analyze/plotly_diagrams"}
+
+
 # %%
 import pandas as pd
 

@@ -35,6 +35,13 @@ upstream = None
 product = None
 
 
+# %% tags=["injected-parameters"]
+# Parameters
+n_keywords = 5
+upstream = {"download-dataset": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/get/dataset.parquet"}
+product = {"nb": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/features/tf_idf_keywords.ipynb", "dataset": "/home/oscar/Progetti/fineweb-c-analysis-ita/products/features/df_with_keywords.parquet"}
+
+
 # %% [markdown]
 # # Objective
 # The objective is to extract important keywords for each sentence.

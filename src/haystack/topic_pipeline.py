@@ -106,7 +106,7 @@ class TopicExtractionPipeline:
                 click.secho("Category: ", fg='yellow', nl=False)
                 click.secho(f"{category}", fg='white')
                 click.secho("Builder Words: ", fg='blue', nl=False)
-                click.secho(f"{len(out["Builder"]["prompt"][0]._content[0].text.split()) + len(out["Builder"]["prompt"][1]._content[0].text.split())}", fg='white')
+                click.secho(f"{len(out['Builder']['prompt'][0]._content[0].text.split()) + len(out['Builder']['prompt'][1]._content[0].text.split())}", fg='white')
                 click.secho(f"Active Categories ({len(prompt_vars.categories)}): ", fg='red', nl=False)
                 click.secho(f"{prompt_vars.categories}", fg='white')
                 # print("System prompt",out["Builder"]["prompt"][0]._content[0].text)
